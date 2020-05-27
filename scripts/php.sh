@@ -11,15 +11,22 @@ if [[ $HHVM == "true" ]]; then
     echo ">>> Installing HHVM"
 
     # Get key and add to sources
-    wget --quiet -O - http://dl.hhvm.com/conf/hhvm.gpg.key | sudo apt-key add -
-    echo deb http://dl.hhvm.com/ubuntu trusty main | sudo tee /etc/apt/sources.list.d/hhvm.list
+    sudo apt-get install -y apt-transport-https software-properties-common
+    sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xB4112585D386EB94
+    sudo add-apt-repository https://dl.hhvm.com/debian
+    apt-get update
+    sudo apt-get install -qq hhvm
+
+    # We are not on Ubuntu anymore
+    # wget --quiet -O - http://dl.hhvm.com/conf/hhvm.gpg.key | sudo apt-key add -
+    # echo deb http://dl.hhvm.com/ubuntu trusty main | sudo tee /etc/apt/sources.list.d/hhvm.list
 
     # Update
     sudo apt-get update
 
     # Install HHVM
     # -qq implies -y --force-yes
-    sudo apt-get install -qq hhvm
+    # sudo apt-get install -qq hhvm
 
     # Start on system boot
     sudo update-rc.d hhvm defaults
@@ -31,8 +38,14 @@ if [[ $HHVM == "true" ]]; then
 else
     echo ">>> Installing PHP $PHP_VERSION"
 
-    sudo add-apt-repository -y ppa:ondrej/php
+    # We are not on Ubuntu anymore.
+    # sudo add-apt-repository -y ppa:ondrej/php
+    sed -i 's#deb http://httpredir.debian.org/debian stretch main#deb http://httpredir.debian.org/debian stretch main contrib non-free#g' /etc/apt/sources.list
+    sudo apt -y install lsb-release apt-transport-https ca-certificates 
+    sudo wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
 
+    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
+        
     sudo apt-key update
     sudo apt-get update
 
